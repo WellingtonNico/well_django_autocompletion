@@ -5,10 +5,13 @@ const cacheSeconds = 30;
 const knownTriggersPrefixes = [
   "{%include",
   "{%extends",
-  'render(',
   "render(",
   "template_name=",
- 
+];
+
+const configs = [
+  { extensions: ["py"], checks: ["render(", "template_name="] },
+  { extensions: ["html"], checks: ["{%include", "{%extends"] },
 ];
 
 let cachedTemplates: vscode.CompletionItem[] = [];
@@ -70,29 +73,30 @@ async function getOrUpdateCompletionItems() {
 export async function activateTemplatesAutocompletion(
   context: vscode.ExtensionContext
 ) {
-  const triggers = createTriggersForGroupKey("");
-  const languageFilters = createDocumentFiltersForExtensions(
-    extensionsForTemplates
-  );
-  context.subscriptions.push(
-    vscode.languages.registerCompletionItemProvider(
-      languageFilters,
-      {
-        async provideCompletionItems(document, position, _, context) {          
-          const initialPosition = new vscode.Position((position as any).c, 0);
-          const line = document.getText(
-            new vscode.Range(initialPosition, position)
-          ).replace(/['"]| /g, '');
-          for (const trigger of knownTriggersPrefixes) {
-            if (line.endsWith(trigger)) {
-              return await getOrUpdateCompletionItems();             
+  for (const config of configs) {
+    const languageFilters = createDocumentFiltersForExtensions(
+      config.extensions
+    );
+    context.subscriptions.push(
+      vscode.languages.registerCompletionItemProvider(
+        languageFilters,
+        {
+          async provideCompletionItems(document, position, _, context) {
+            const initialPosition = new vscode.Position((position as any).c, 0);
+            const line = document
+              .getText(new vscode.Range(initialPosition, position))
+              .replace(/['"]| /g, "");
+            for (const trigger of config.checks) {
+              if (line.endsWith(trigger)) {
+                return await getOrUpdateCompletionItems();
+              }
             }
-          }
-          return await Promise.resolve([]);
+            return await Promise.resolve([]);
+          },
         },
-      },
-      '"',
-      "'"
-    )
-  );
+        '"',
+        "'"
+      )
+    );
+  }
 }
