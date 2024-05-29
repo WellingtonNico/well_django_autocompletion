@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 
 const extensionsForTemplates = ["html", "py"];
+const cacheSeconds = 30;
 const knownTriggersPrefixes = [
   "{% include '",
   "{% extends '",
@@ -12,6 +13,9 @@ const knownTriggersPrefixes = [
   'template_name = "',
   "render(",
 ];
+
+let cachedTemplates: vscode.CompletionItem[] = [];
+let cachedLastUpdatedTime = new Date().getTime();
 
 async function getTemplatesFilesUris() {
   return await vscode.workspace.findFiles("**/templates/**/*.html");
@@ -26,12 +30,6 @@ function cleanTemplatesUris(uris: vscode.Uri[]) {
 
 function createTriggersForGroupKey(key: string) {
   return knownTriggersPrefixes.map((trigger) => `${trigger}${key}`);
-}
-
-async function provideCompletionItems() {
-  const templatesFilesUris = await getTemplatesFilesUris();
-  const cleanedTamplates = cleanTemplatesUris(templatesFilesUris);
-  return convertPathsToCompletionItems(cleanedTamplates);
 }
 
 function convertPathsToCompletionItems(cleanedTemplates: string[]) {
@@ -51,6 +49,27 @@ function createDocumentFiltersForExtensions(extensions: string[]) {
   }));
 }
 
+async function getOrUpdateCompletionItems() {
+  const now = new Date().getTime();
+  if (
+    now - cachedLastUpdatedTime < cacheSeconds * 1000 &&
+    cachedTemplates.length > 0
+  ) {
+    return cachedTemplates;
+  }
+  try {
+    const templatesFilesUris = await getTemplatesFilesUris();
+    const cleanedTemplates = cleanTemplatesUris(templatesFilesUris);
+    const completionItems = convertPathsToCompletionItems(cleanedTemplates);
+    cachedTemplates = completionItems;
+    cachedLastUpdatedTime = now;
+    return completionItems;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
 export async function activateTemplatesAutocompletion(
   context: vscode.ExtensionContext
 ) {
@@ -62,7 +81,9 @@ export async function activateTemplatesAutocompletion(
     vscode.languages.registerCompletionItemProvider(
       languageFilters,
       {
-        provideCompletionItems,
+        async provideCompletionItems() {
+          return await getOrUpdateCompletionItems();
+        },
       },
       ...triggers
     )
