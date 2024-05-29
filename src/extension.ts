@@ -4,13 +4,14 @@ import * as vscode from "vscode";
 import { activateTemplatesAutocompletion } from "./functions/templates_autocompletion";
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log("Extensão ativada!");
-
-  let disposable = vscode.commands.registerCommand("teste1.ativar", () => {
-    vscode.window.showInformationMessage("Extensão ativada.");
-    activateTemplatesAutocompletion(context);
-  });
-
+  let disposable = vscode.commands.registerCommand(
+    "well_autocomplete.ativar",
+    () => {
+      vscode.window.showInformationMessage("Well autocomplete ativada.");
+      activateTemplatesAutocompletion(context);
+    }
+  );
+  vscode.commands.executeCommand("well_autocomplete.ativar");
   context.subscriptions.push(disposable);
 }
 

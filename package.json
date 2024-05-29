@@ -9,13 +9,13 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [ "*" ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "teste1.ativar",
-        "title": "Ativar django"
+        "command": "well_autocomplete.ativar",
+        "title": "Well autocomplete ativar"
       }
     ]
   },
