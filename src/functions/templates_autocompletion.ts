@@ -13,55 +13,33 @@ const knownTriggersPrefixes = [
   "render(",
 ];
 
-type TemplatesGroups = {
-  [key: string]: string[];
-};
-
 async function getTemplatesFilesUris() {
   return await vscode.workspace.findFiles("**/templates/**/*.html");
 }
 
 function cleanTemplatesUris(uris: vscode.Uri[]) {
-  const result: TemplatesGroups = {};
-  uris.forEach((uri) => {
-    const dir = uri.fsPath;
-    const cleanedFileDir = dir.split("templates/")[1];
-    const startName = cleanedFileDir.split("/")[0];
-    if (!result[startName]) {
-      result[startName] = [];
-    }
-    result[startName].push(cleanedFileDir);
+  return uris.map((url) => {
+    const dir = url.fsPath;
+    return dir.split("templates/")[1];
   });
-  return result;
 }
 
 function createTriggersForGroupKey(key: string) {
   return knownTriggersPrefixes.map((trigger) => `${trigger}${key}`);
 }
 
-function createTemplatesProvider(
-  languageCodes: vscode.DocumentFilter[],
-  items: vscode.CompletionItem[],
-  triggers: string[]
-) {
-  return vscode.languages.registerCompletionItemProvider(
-    languageCodes,
-    {
-      provideCompletionItems() {
-        console.log("retornando itens");
-        return items;
-      },
-    },
-    ...triggers
-  );
+async function provideCompletionItems() {
+  const templatesFilesUris = await getTemplatesFilesUris();
+  const cleanedTamplates = cleanTemplatesUris(templatesFilesUris);
+  return convertPathsToCompletionItems(cleanedTamplates);
 }
 
-function convertPathsToCompletionItems(paths: string[]) {
-  return paths
-    .map((path) => ({
-      label: path,
+function convertPathsToCompletionItems(cleanedTemplates: string[]) {
+  return cleanedTemplates
+    .map((cleanedTemplate) => ({
+      label: cleanedTemplate,
       kind: vscode.CompletionItemKind.File,
-      insertText: path,
+      insertText: cleanedTemplate,
     }))
     .sort();
 }
@@ -76,17 +54,17 @@ function createDocumentFiltersForExtensions(extensions: string[]) {
 export async function activateTemplatesAutocompletion(
   context: vscode.ExtensionContext
 ) {
-  const templatesFilesUris = await getTemplatesFilesUris();
-  const templatesGroups = cleanTemplatesUris(templatesFilesUris);
-
-  Object.entries(templatesGroups).forEach(([groupKey, cleanedTamplates]) => {
-    const triggers = createTriggersForGroupKey(groupKey);
-    const completionItems = convertPathsToCompletionItems(cleanedTamplates);
-    const languageFilters = createDocumentFiltersForExtensions(
-      extensionsForTemplates
-    );
-    context.subscriptions.push(
-      createTemplatesProvider(languageFilters, completionItems, triggers)
-    );
-  });
+  const triggers = createTriggersForGroupKey("");
+  const languageFilters = createDocumentFiltersForExtensions(
+    extensionsForTemplates
+  );
+  context.subscriptions.push(
+    vscode.languages.registerCompletionItemProvider(
+      languageFilters,
+      {
+        provideCompletionItems,
+      },
+      ...triggers
+    )
+  );
 }
