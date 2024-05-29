@@ -5,6 +5,10 @@ import {
   activateTemplatesAutocompletion,
   updateTemplatesCompletions,
 } from "./functions/templates_autocompletion";
+import {
+  activateUrlNamesAutocompletion,
+  updateUrlsConfigsCache,
+} from "./functions/urls_autocompletion";
 
 export function activate(context: vscode.ExtensionContext) {
   let activate = vscode.commands.registerCommand(
@@ -12,15 +16,17 @@ export function activate(context: vscode.ExtensionContext) {
     () => {
       vscode.window.showInformationMessage("Well autocomplete activated.");
       activateTemplatesAutocompletion(context);
+      activateUrlNamesAutocompletion(context);
     }
   );
   let update = vscode.commands.registerCommand(
-    "well_autocomplete.update_templates_cache",
+    "well_autocomplete.update_cache",
     () => {
       vscode.window.showInformationMessage(
         "Well autocomplete update incomming."
       );
       updateTemplatesCompletions();
+      updateUrlsConfigsCache();
     }
   );
   vscode.commands.executeCommand("well_autocomplete.activate");

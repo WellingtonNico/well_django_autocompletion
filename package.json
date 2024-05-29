@@ -19,8 +19,8 @@
         "title": "Well autocomplete activate"
       },
       {
-        "command": "well_autocomplete.update_templates_cache",
-        "title": "Well autocomplete update templates cache"
+        "command": "well_autocomplete.update_cache",
+        "title": "Well autocomplete update cache"
       }
     ]
   },

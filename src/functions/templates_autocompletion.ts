@@ -1,5 +1,10 @@
 import * as vscode from "vscode";
 import * as types from "../types/main";
+import {
+  createDocumentFiltersForExtensions,
+  createEndsWithRegex,
+  getCleanedLine,
+} from "./utils";
 
 const cacheSeconds = 240;
 
@@ -39,13 +44,6 @@ function convertPathsToCompletionItems(cleanedTemplates: string[]) {
     .sort();
 }
 
-function createDocumentFiltersForExtensions(extensions: string[]) {
-  return extensions.map((languageCode) => ({
-    scheme: "file",
-    pattern: `**/*.${languageCode}`,
-  }));
-}
-
 export async function updateTemplatesCompletions() {
   const templatesFilesUris = await getTemplatesFilesUris();
   const cleanedTemplates = cleanTemplatesUris(templatesFilesUris);
@@ -71,29 +69,6 @@ async function getOrUpdateCompletionItems() {
   }
 }
 
-function getCleanedLine(
-  document: vscode.TextDocument,
-  currentPosition: vscode.Position
-) {
-  let lineIndex = (currentPosition as any).c - linesToCheck;
-  if (lineIndex < 0) {
-    lineIndex = 0;
-  }
-  const initialPosition = new vscode.Position(lineIndex, 0);
-  const line = document
-    .getText(new vscode.Range(initialPosition, currentPosition))
-    .replace(/[\'\"|\t|\n\s]/g, "");
-  return line;
-}
-
-function createEndsWithRegex(strings: string[]) {
-  const escapedStrings = strings.map((str) =>
-    str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-  );
-  const pattern = escapedStrings.join("|") + "$";
-  return new RegExp(pattern);
-}
-
 function createAutocompletionProvider(config: types.ProviderConfig) {
   const languageFilters = createDocumentFiltersForExtensions(config.extensions);
   const regexPattern = createEndsWithRegex(config.checks);
@@ -101,7 +76,7 @@ function createAutocompletionProvider(config: types.ProviderConfig) {
     languageFilters,
     {
       async provideCompletionItems(document, position, _, context) {
-        const line = getCleanedLine(document, position);
+        const line = getCleanedLine(document, position, linesToCheck);
         if (regexPattern.test(line)) {
           return await getOrUpdateCompletionItems();
         }
