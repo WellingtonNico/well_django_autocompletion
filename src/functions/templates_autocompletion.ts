@@ -2,6 +2,8 @@ import * as vscode from "vscode";
 
 const cacheSeconds = 30;
 
+const triggers = ['"', "'"];
+
 const configs = [
   { extensions: ["py"], checks: ["render(", "template_name="] },
   { extensions: ["html"], checks: ["{%include", "{%extends"] },
@@ -20,7 +22,6 @@ function cleanTemplatesUris(uris: vscode.Uri[]) {
     return dir.split("templates/")[1];
   });
 }
-
 
 function convertPathsToCompletionItems(cleanedTemplates: string[]) {
   return cleanedTemplates
@@ -60,6 +61,30 @@ async function getOrUpdateCompletionItems() {
   }
 }
 
+function getCleanedLine(
+  document: vscode.TextDocument,
+  currentPosition: vscode.Position
+) {
+  let lineIndex = (currentPosition as any).c;
+  if (lineIndex > 0) {
+    lineIndex--;
+  }
+  const initialPosition = new vscode.Position(lineIndex, 0);
+  const line = document
+    .getText(new vscode.Range(initialPosition, currentPosition))
+    .replace(/[\'\"|\t|\n\s]/g, "");
+  return line;
+}
+
+function createEndsWithRegex(strings: string[]) {
+  // Escape special characters in the strings and join them with the '|' (OR) operator
+  const escapedStrings = strings.map((str) =>
+    str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  );
+  const pattern = escapedStrings.join("|") + "$";
+  return new RegExp(pattern);
+}
+
 export async function activateTemplatesAutocompletion(
   context: vscode.ExtensionContext
 ) {
@@ -67,25 +92,20 @@ export async function activateTemplatesAutocompletion(
     const languageFilters = createDocumentFiltersForExtensions(
       config.extensions
     );
+    const regexPattern = createEndsWithRegex(config.checks);
     context.subscriptions.push(
       vscode.languages.registerCompletionItemProvider(
         languageFilters,
         {
           async provideCompletionItems(document, position, _, context) {
-            const initialPosition = new vscode.Position((position as any).c, 0);
-            const line = document
-              .getText(new vscode.Range(initialPosition, position))
-              .replace(/['"]| /g, "");
-            for (const trigger of config.checks) {
-              if (line.endsWith(trigger)) {
-                return await getOrUpdateCompletionItems();
-              }
+            const line = getCleanedLine(document, position);
+            if (regexPattern.test(line)) {
+              return await getOrUpdateCompletionItems();
             }
             return await Promise.resolve([]);
           },
         },
-        '"',
-        "'"
+        ...triggers
       )
     );
   }
