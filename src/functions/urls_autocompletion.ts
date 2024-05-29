@@ -35,6 +35,8 @@ type UrlsConfigs = {
   [key: string]: UrlConfig[];
 };
 
+
+
 type GroupedUrls = {
   [key: string]: vscode.Uri[];
 };
@@ -81,16 +83,22 @@ export async function updateUrlsConfigsCache() {
   for (const url of urls) {
     const configs = await getUrlsConfigsFromFile(url);
     for (const urlName of configs.urlNames) {
-      const url = `${configs.appName}${configs.appName ? ":" : ""}${urlName}`;
+      const completeUrl = `${configs.appName}${
+        configs.appName ? ":" : ""
+      }${urlName}`;
       cachedUrlsConfigs.push({
-        label: url,
-        insertText: url,
+        label: completeUrl,
+        insertText: completeUrl,
         kind: vscode.CompletionItemKind.Text,
       });
-      if (!cachedGroupUrls[url]) {
-        cachedGroupUrls[url] = [];
+      if (!cachedGroupUrls[completeUrl]) {
+        cachedGroupUrls[completeUrl] = [];
       }
-      cachedGroupUrls[url].push(configs.uri);
+      cachedGroupUrls[completeUrl].push(configs.uri);
+      if (!cachedGroupUrls[urlName]) {
+        cachedGroupUrls[urlName] = [];
+      }
+      cachedGroupUrls[urlName].push(configs.uri);
     }
   }
   cachedLastUpdatedTime = new Date().getTime();
@@ -131,15 +139,29 @@ function createAutocompletionProvider(config: types.ProviderConfig) {
   );
 }
 
-
-
 function createDefinitionProviderForUrls() {
-  // return vscode.languages.registerDefinitionProvider();
+  const languageFilters = createDocumentFiltersForExtensions(["py", "html"]);
+  return vscode.languages.registerDefinitionProvider(languageFilters, {
+    async provideDefinition(document, position, token) {
+      const range = document.getWordRangeAtPosition(position);
+      if (!range || range.isEmpty) {
+        return [];
+      }
+      const word = document.getText(range).toLowerCase();
+      await getOrUpdateCompletionItems();
+      const configs = cachedGroupUrls[word];
+      if (configs === undefined) {
+        return [];
+      }
+      return configs.map((uri) => ({ uri, range }));
+    },
+  });
 }
 
 export async function activateUrlNamesAutocompletion(
   context: vscode.ExtensionContext
 ) {
+  createDefinitionProviderForUrls();
   for (const config of configs) {
     const provider = createAutocompletionProvider(config);
     context.subscriptions.push(provider);
