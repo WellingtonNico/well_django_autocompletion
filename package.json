@@ -1,7 +1,7 @@
 {
-  "name": "teste1",
-  "displayName": "teste1",
-  "description": "teste",
+  "name": "well_autocomplete",
+  "displayName": "Well autocomplete for Django",
+  "description": "django template autocompletion",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.89.0"
@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "well_autocomplete.ativar",
-        "title": "Well autocomplete ativar"
+        "command": "well_autocomplete.activate",
+        "title": "Well autocomplete activate"
       }
     ]
   },

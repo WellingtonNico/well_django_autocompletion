@@ -5,13 +5,13 @@ import { activateTemplatesAutocompletion } from "./functions/templates_autocompl
 
 export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
-    "well_autocomplete.ativar",
+    "well_autocomplete.activate",
     () => {
-      vscode.window.showInformationMessage("Well autocomplete ativada.");
+      vscode.window.showInformationMessage("Well autocomplete activated.");
       activateTemplatesAutocompletion(context);
     }
   );
-  vscode.commands.executeCommand("well_autocomplete.ativar");
+  vscode.commands.executeCommand("well_autocomplete.activate");
   context.subscriptions.push(disposable);
 }
 
