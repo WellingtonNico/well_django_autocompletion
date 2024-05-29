@@ -95,6 +95,8 @@ export async function updateUrlsConfigsCache() {
         cachedGroupUrls[completeUrl] = [];
       }
       cachedGroupUrls[completeUrl].push(configs.uri);
+
+      // TODO: remover após resolver questão do prefixo da url
       if (!cachedGroupUrls[urlName]) {
         cachedGroupUrls[urlName] = [];
       }
