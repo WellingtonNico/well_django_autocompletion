@@ -17,6 +17,10 @@
       {
         "command": "well_autocomplete.activate",
         "title": "Well autocomplete activate"
+      },
+      {
+        "command": "well_autocomplete.update_templates_cache",
+        "title": "Well autocomplete update templates cache"
       }
     ]
   },

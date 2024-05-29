@@ -1,17 +1,13 @@
 import * as vscode from "vscode";
+import * as types from "../types/main";
 
-const cacheSeconds = 30;
+const cacheSeconds = 240;
 
 const triggers = ['"', "'"];
 
 const linesToCheck = 2;
 
-type ProviderConfig = {
-  extensions: string[];
-  checks: string[];
-};
-
-const configs: ProviderConfig[] = [
+const configs: types.ProviderConfig[] = [
   {
     extensions: ["py"],
     checks: ["render(", "template_name=", "template_name:"],
@@ -50,6 +46,15 @@ function createDocumentFiltersForExtensions(extensions: string[]) {
   }));
 }
 
+export async function updateTemplatesCompletions() {
+  const templatesFilesUris = await getTemplatesFilesUris();
+  const cleanedTemplates = cleanTemplatesUris(templatesFilesUris);
+  const completionItems = convertPathsToCompletionItems(cleanedTemplates);
+  cachedTemplates = completionItems;
+  cachedLastUpdatedTime = new Date().getTime();
+  return completionItems;
+}
+
 async function getOrUpdateCompletionItems() {
   const now = new Date().getTime();
   if (
@@ -59,12 +64,7 @@ async function getOrUpdateCompletionItems() {
     return cachedTemplates;
   }
   try {
-    const templatesFilesUris = await getTemplatesFilesUris();
-    const cleanedTemplates = cleanTemplatesUris(templatesFilesUris);
-    const completionItems = convertPathsToCompletionItems(cleanedTemplates);
-    cachedTemplates = completionItems;
-    cachedLastUpdatedTime = now;
-    return completionItems;
+    return await updateTemplatesCompletions();
   } catch (error) {
     console.error(error);
     return [];
@@ -94,7 +94,7 @@ function createEndsWithRegex(strings: string[]) {
   return new RegExp(pattern);
 }
 
-function createAutocompletionProvider(config: ProviderConfig) {
+function createAutocompletionProvider(config: types.ProviderConfig) {
   const languageFilters = createDocumentFiltersForExtensions(config.extensions);
   const regexPattern = createEndsWithRegex(config.checks);
   return vscode.languages.registerCompletionItemProvider(
