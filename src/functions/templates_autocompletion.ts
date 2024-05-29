@@ -4,8 +4,18 @@ const cacheSeconds = 30;
 
 const triggers = ['"', "'"];
 
-const configs = [
-  { extensions: ["py"], checks: ["render(", "template_name="] },
+const linesToCheck = 2;
+
+type ProviderConfig = {
+  extensions: string[];
+  checks: string[];
+};
+
+const configs: ProviderConfig[] = [
+  {
+    extensions: ["py"],
+    checks: ["render(", "template_name="],
+  },
   { extensions: ["html"], checks: ["{%include", "{%extends"] },
 ];
 
@@ -65,9 +75,9 @@ function getCleanedLine(
   document: vscode.TextDocument,
   currentPosition: vscode.Position
 ) {
-  let lineIndex = (currentPosition as any).c;
-  if (lineIndex > 0) {
-    lineIndex--;
+  let lineIndex = (currentPosition as any).c - linesToCheck;
+  if (lineIndex < 0) {
+    lineIndex = 0;
   }
   const initialPosition = new vscode.Position(lineIndex, 0);
   const line = document
@@ -77,7 +87,6 @@ function getCleanedLine(
 }
 
 function createEndsWithRegex(strings: string[]) {
-  // Escape special characters in the strings and join them with the '|' (OR) operator
   const escapedStrings = strings.map((str) =>
     str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
   );
@@ -85,28 +94,29 @@ function createEndsWithRegex(strings: string[]) {
   return new RegExp(pattern);
 }
 
+function createAutocompletionProvider(config: ProviderConfig) {
+  const languageFilters = createDocumentFiltersForExtensions(config.extensions);
+  const regexPattern = createEndsWithRegex(config.checks);
+  return vscode.languages.registerCompletionItemProvider(
+    languageFilters,
+    {
+      async provideCompletionItems(document, position, _, context) {
+        const line = getCleanedLine(document, position);
+        if (regexPattern.test(line)) {
+          return await getOrUpdateCompletionItems();
+        }
+        return await Promise.resolve([]);
+      },
+    },
+    ...triggers
+  );
+}
+
 export async function activateTemplatesAutocompletion(
   context: vscode.ExtensionContext
 ) {
   for (const config of configs) {
-    const languageFilters = createDocumentFiltersForExtensions(
-      config.extensions
-    );
-    const regexPattern = createEndsWithRegex(config.checks);
-    context.subscriptions.push(
-      vscode.languages.registerCompletionItemProvider(
-        languageFilters,
-        {
-          async provideCompletionItems(document, position, _, context) {
-            const line = getCleanedLine(document, position);
-            if (regexPattern.test(line)) {
-              return await getOrUpdateCompletionItems();
-            }
-            return await Promise.resolve([]);
-          },
-        },
-        ...triggers
-      )
-    );
+    const provider = createAutocompletionProvider(config);
+    context.subscriptions.push(provider);
   }
 }
