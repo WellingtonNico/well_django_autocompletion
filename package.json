@@ -3,6 +3,7 @@
   "displayName": "Well autocomplete for Django",
   "description": "django template autocompletion",
   "version": "0.0.1",
+  "icon":"icon.png",
   "engines": {
     "vscode": "^1.89.0"
   },
