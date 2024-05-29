@@ -30,3 +30,13 @@ export function getCleanedLine(
     .replace(/[\'\"|\t|\n\s]/g, "");
   return line;
 }
+
+export async function isDjangoProject() {
+  let manage = await vscode.workspace.findFiles("**/manage.py");
+  let settings = await vscode.workspace.findFiles("**/settings.py");
+  if (manage.length && settings.length) {
+    return true;
+  } else {
+    return false;
+  }
+}

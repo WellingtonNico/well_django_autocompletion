@@ -9,8 +9,14 @@ import {
   activateUrlNamesAutocompletion,
   updateUrlsConfigsCache,
 } from "./functions/urls_autocompletion";
+import { isDjangoProject } from "./functions/utils";
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
+  const isDjango = await isDjangoProject();
+
+  if (!isDjango) {
+    return;
+  }
   let activate = vscode.commands.registerCommand(
     "well_autocomplete.activate",
     () => {

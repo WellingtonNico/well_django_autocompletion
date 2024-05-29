@@ -22,7 +22,7 @@ const configs: types.ProviderConfig[] = [
       "url:",
     ],
   },
-  { extensions: ["html"], checks: ["{%url"] },
+  { extensions: ["html"], checks: ["{%url", "url_name", "url"] },
 ];
 
 type UrlConfig = {
@@ -36,7 +36,7 @@ type UrlsConfigs = {
 
 type UrlFileConfig = {
   uri: vscode.Uri;
-  appName: string;
+  appName: string | null;
   urlNames: string[];
 };
 
@@ -48,15 +48,13 @@ async function getUrlsFilesUris() {
 }
 
 async function getUrlsConfigsFromFile(uri: vscode.Uri): Promise<UrlFileConfig> {
-  const result: UrlsConfigs = {};
   const data = (await vscode.workspace.fs.readFile(uri)).toString();
   const appNameRegex = /app_name\s*=\s*(.*)/;
-  let appName = "";
+  let appName = null;
   const appNameMatch = appNameRegex.exec(data);
   if (appNameMatch && appNameMatch[1]) {
     appName = appNameMatch[1].trim().replace(/['"]/g, "");
   }
-  result[appName] = [];
   const nameArgRegex = /\b(name)( *=*)*[\'\"](.*)[\'\"]/g;
   const urlNames = [];
   let match;
