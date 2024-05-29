@@ -3,15 +3,12 @@ import * as vscode from "vscode";
 const extensionsForTemplates = ["html", "py"];
 const cacheSeconds = 30;
 const knownTriggersPrefixes = [
-  "{% include '",
-  "{% extends '",
-  '{% include "',
-  '{% extends "',
-  "template_name='",
-  'template_name="',
-  "template_name = '",
-  'template_name = "',
+  "{%include",
+  "{%extends",
+  'render(',
   "render(",
+  "template_name=",
+ 
 ];
 
 let cachedTemplates: vscode.CompletionItem[] = [];
@@ -81,11 +78,21 @@ export async function activateTemplatesAutocompletion(
     vscode.languages.registerCompletionItemProvider(
       languageFilters,
       {
-        async provideCompletionItems() {
-          return await getOrUpdateCompletionItems();
+        async provideCompletionItems(document, position, _, context) {          
+          const initialPosition = new vscode.Position((position as any).c, 0);
+          const line = document.getText(
+            new vscode.Range(initialPosition, position)
+          ).replace(/['"]| /g, '');
+          for (const trigger of knownTriggersPrefixes) {
+            if (line.endsWith(trigger)) {
+              return await getOrUpdateCompletionItems();             
+            }
+          }
+          return await Promise.resolve([]);
         },
       },
-      ...triggers
+      '"',
+      "'"
     )
   );
 }
