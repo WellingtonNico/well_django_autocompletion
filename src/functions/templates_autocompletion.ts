@@ -14,7 +14,7 @@ type ProviderConfig = {
 const configs: ProviderConfig[] = [
   {
     extensions: ["py"],
-    checks: ["render(", "template_name="],
+    checks: ["render(", "template_name=", "template_name:"],
   },
   { extensions: ["html"], checks: ["{%include", "{%extends"] },
 ];
