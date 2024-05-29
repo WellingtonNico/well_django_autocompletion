@@ -5,11 +5,13 @@ import {
   createEndsWithRegex,
   getCleanedLine,
 } from "./utils";
-import { group } from "console";
+
 
 const cacheSeconds = 240;
 
 const triggers = ['"', "'"];
+
+const extensionsForUrlsDefinitionProvider = ["py", "html"];
 
 const configs: types.ProviderConfig[] = [
   {
@@ -34,8 +36,6 @@ type UrlConfig = {
 type UrlsConfigs = {
   [key: string]: UrlConfig[];
 };
-
-
 
 type GroupedUrls = {
   [key: string]: vscode.Uri[];
@@ -95,12 +95,6 @@ export async function updateUrlsConfigsCache() {
         cachedGroupUrls[completeUrl] = [];
       }
       cachedGroupUrls[completeUrl].push(configs.uri);
-
-      // TODO: remover após resolver questão do prefixo da url
-      if (!cachedGroupUrls[urlName]) {
-        cachedGroupUrls[urlName] = [];
-      }
-      cachedGroupUrls[urlName].push(configs.uri);
     }
   }
   cachedLastUpdatedTime = new Date().getTime();
@@ -141,29 +135,60 @@ function createAutocompletionProvider(config: types.ProviderConfig) {
   );
 }
 
-function createDefinitionProviderForUrls() {
-  const languageFilters = createDocumentFiltersForExtensions(["py", "html"]);
+async function urlProviderDefinition(
+  document: vscode.TextDocument,
+  position: vscode.Position
+) {
+  let range = document.getWordRangeAtPosition(position);
+  if (!range || range.isEmpty) {
+    return [];
+  }
+  let urlName = document.getText(range);
+  // catches the characters before the selected word
+  const doubleDotsCheck = document.getText(
+    new vscode.Range(
+      new vscode.Position(range.start.line, range.start.character - 1),
+      range.start
+    )
+  );
+  // check if there is a namespace before url name
+  if (doubleDotsCheck === ":") {
+    const appName = document
+      .getText(
+        new vscode.Range(
+          new vscode.Position(range.start.line, 0),
+          new vscode.Position(range.start.line, range.start.character - 1)
+        )
+      )
+      .replaceAll('"', "'")
+      .split("'")
+      .pop();
+    // if there is a namespace before url name then add it to the url
+    if (appName) {
+      urlName = `${appName}:${urlName}`;
+    }
+  }
+  await getOrUpdateCompletionItems();
+  const configs = cachedGroupUrls[urlName];
+  if (configs === undefined) {
+    return [];
+  }
+  return configs.map((uri) => ({ uri, range }));
+}
+
+function activateDefinitionProviderForUrls() {
+  const languageFilters = createDocumentFiltersForExtensions(
+    extensionsForUrlsDefinitionProvider
+  );
   return vscode.languages.registerDefinitionProvider(languageFilters, {
-    async provideDefinition(document, position, token) {
-      const range = document.getWordRangeAtPosition(position);
-      if (!range || range.isEmpty) {
-        return [];
-      }
-      const word = document.getText(range).toLowerCase();
-      await getOrUpdateCompletionItems();
-      const configs = cachedGroupUrls[word];
-      if (configs === undefined) {
-        return [];
-      }
-      return configs.map((uri) => ({ uri, range }));
-    },
+    provideDefinition: urlProviderDefinition,
   });
 }
 
 export async function activateUrlNamesAutocompletion(
   context: vscode.ExtensionContext
 ) {
-  createDefinitionProviderForUrls();
+  activateDefinitionProviderForUrls();
   for (const config of configs) {
     const provider = createAutocompletionProvider(config);
     context.subscriptions.push(provider);
