@@ -1,13 +1,6 @@
 import * as vscode from "vscode";
 
-const extensionsForTemplates = ["html", "py"];
 const cacheSeconds = 30;
-const knownTriggersPrefixes = [
-  "{%include",
-  "{%extends",
-  "render(",
-  "template_name=",
-];
 
 const configs = [
   { extensions: ["py"], checks: ["render(", "template_name="] },
@@ -28,9 +21,6 @@ function cleanTemplatesUris(uris: vscode.Uri[]) {
   });
 }
 
-function createTriggersForGroupKey(key: string) {
-  return knownTriggersPrefixes.map((trigger) => `${trigger}${key}`);
-}
 
 function convertPathsToCompletionItems(cleanedTemplates: string[]) {
   return cleanedTemplates
