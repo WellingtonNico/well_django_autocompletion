@@ -5,6 +5,7 @@ import {
   createEndsWithRegex,
   getCleanedLine,
 } from "./utils";
+import { group } from "console";
 
 const cacheSeconds = 240;
 
@@ -34,6 +35,10 @@ type UrlsConfigs = {
   [key: string]: UrlConfig[];
 };
 
+type GroupedUrls = {
+  [key: string]: vscode.Uri[];
+};
+
 type UrlFileConfig = {
   uri: vscode.Uri;
   appName: string | null;
@@ -41,6 +46,7 @@ type UrlFileConfig = {
 };
 
 let cachedUrlsConfigs: vscode.CompletionItem[] = [];
+let cachedGroupUrls: GroupedUrls = {};
 let cachedLastUpdatedTime = new Date().getTime();
 
 async function getUrlsFilesUris() {
@@ -71,6 +77,7 @@ async function getUrlsConfigsFromFile(uri: vscode.Uri): Promise<UrlFileConfig> {
 export async function updateUrlsConfigsCache() {
   const urls = await getUrlsFilesUris();
   cachedUrlsConfigs = [];
+  cachedGroupUrls = {};
   for (const url of urls) {
     const configs = await getUrlsConfigsFromFile(url);
     for (const urlName of configs.urlNames) {
@@ -80,6 +87,10 @@ export async function updateUrlsConfigsCache() {
         insertText: url,
         kind: vscode.CompletionItemKind.Text,
       });
+      if (!cachedGroupUrls[url]) {
+        cachedGroupUrls[url] = [];
+      }
+      cachedGroupUrls[url].push(configs.uri);
     }
   }
   cachedLastUpdatedTime = new Date().getTime();
@@ -118,6 +129,12 @@ function createAutocompletionProvider(config: types.ProviderConfig) {
     },
     ...triggers
   );
+}
+
+
+
+function createDefinitionProviderForUrls() {
+  // return vscode.languages.registerDefinitionProvider();
 }
 
 export async function activateUrlNamesAutocompletion(
