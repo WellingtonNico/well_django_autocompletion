@@ -13,7 +13,8 @@ const triggers = ['"', "'"];
 const linesToCheck = 1;
 
 const configs: types.ProviderConfig[] = [
-  { extensions: ["html", "py"], checks: ["{%static", "{%extends"] },
+  { extensions: ["html", "py"], checks: ["{%static", "{%extends", "src="] },
+  { extensions: ["js"], checks: ["src="] },
 ];
 
 type CleanedFiles = {
@@ -88,6 +89,7 @@ function createAutocompletionProvider(config: types.ProviderConfig) {
     ...triggers
   );
 }
+
 
 export async function activateStaticFilesAutocompletion(
   context: vscode.ExtensionContext
