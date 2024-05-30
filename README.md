@@ -13,3 +13,4 @@
 
 ![All text](images/example_on_template.gif)
 ![All text](images/template_autocompletion.gif)
+![All text](images/url_autocompletion.gif)
