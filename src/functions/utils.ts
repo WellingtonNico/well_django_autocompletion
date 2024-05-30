@@ -1,5 +1,30 @@
 import * as vscode from "vscode";
 
+export const fileBeginningRange = new vscode.Range(
+  new vscode.Position(0, 0),
+  new vscode.Position(0, 0)
+);
+
+export function getCompleteWordFromLine(
+  document: vscode.TextDocument,
+  lineNumber: number,
+  partialWord: string
+) {
+  const regex = new RegExp(
+    String.raw`['"]([^'\s"]*${partialWord}[^'\s"]*)['"]`,
+    "gi"
+  );
+
+  const line = document.lineAt(lineNumber).text;
+
+  const matches = regex.exec(line);
+
+  if (matches && matches[1]) {
+    return matches[1];
+  }
+  return null;
+}
+
 export function createDocumentFiltersForExtensions(extensions: string[]) {
   return extensions.map((languageCode) => ({
     scheme: "file",

@@ -3,7 +3,9 @@ import * as types from "../types/main";
 import {
   createDocumentFiltersForExtensions,
   createEndsWithRegex,
+  fileBeginningRange,
   getCleanedLine,
+  getCompleteWordFromLine,
 } from "./utils";
 
 const cacheSeconds = 240;
@@ -14,7 +16,8 @@ const linesToCheck = 1;
 
 const configs: types.ProviderConfig[] = [
   { extensions: ["html", "py"], checks: ["{%static", "{%extends", "src="] },
-  { extensions: ["js"], checks: ["src="] },
+  { extensions: ["js"], checks: ["src=", "url(", "@import"] },
+  { extensions: ["css"], checks: ["url(", "@import"] },
 ];
 
 type CleanedFiles = {
@@ -98,24 +101,32 @@ async function definitionProviderForStaticFiles(
   if (!wordRange || wordRange.isEmpty) {
     return [];
   }
-  let label = document.getText(wordRange);
-
-  await getOrUpdateCompletionItems();
-  const configs = cachedStaticFilesDefinitions[label];
-  if (configs === undefined) {
-    return [];
+  let partialWord = document.getText(wordRange);
+  const completeWord = getCompleteWordFromLine(
+    document,
+    position.line,
+    partialWord
+  );
+  if (completeWord) {
+    partialWord = completeWord;
   }
-  return configs.map((uri) => ({
-    uri,
-    range: new vscode.Range(
-      new vscode.Position(0, 0),
-      new vscode.Position(0, 0)
-    ),
-  }));
+  await getOrUpdateCompletionItems();
+  if (partialWord in cachedStaticFilesDefinitions) {
+    return cachedStaticFilesDefinitions[partialWord].map((uri) => ({
+      uri,
+      range: fileBeginningRange,
+    }));
+  }
+  return [];
 }
 
 function activateDefinitionProviderForStaticFiles() {
-  const languageFilters = createDocumentFiltersForExtensions(["html"]);
+  const languageFilters = createDocumentFiltersForExtensions([
+    "html",
+    "js",
+    "css",
+    "py",
+  ]);
   return vscode.languages.registerDefinitionProvider(languageFilters, {
     provideDefinition: definitionProviderForStaticFiles,
   });

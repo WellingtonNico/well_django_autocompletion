@@ -3,7 +3,9 @@ import * as types from "../types/main";
 import {
   createDocumentFiltersForExtensions,
   createEndsWithRegex,
+  fileBeginningRange,
   getCleanedLine,
+  getCompleteWordFromLine,
 } from "./utils";
 
 const cacheSeconds = 240;
@@ -144,34 +146,19 @@ async function urlProviderDefinition(
     return [];
   }
   let urlName = document.getText(wordRange);
-
-  const regex = new RegExp(
-    String.raw`['"]([^'\s"]*${urlName}[^'\s"]*)['"]`,
-    "gi"
+  const completeUrlName = getCompleteWordFromLine(
+    document,
+    position.line,
+    urlName
   );
-
-  const line = document.getText(
-    new vscode.Range(
-      new vscode.Position(position.line, 0),
-      new vscode.Position(position.line + 1, 0)
-    )
-  );
-
-  const matches = regex.exec(line);
-
-  if (matches && matches[1]) {
-    urlName = matches[1];
+  if (completeUrlName) {
+    urlName = completeUrlName;
   }
-
-  // catches the characters before the selected word
   await getOrUpdateCompletionItems();
   if (urlName in cachedGroupUrls) {
     return cachedGroupUrls[urlName].map((uri) => ({
       uri,
-      range: new vscode.Range(
-        new vscode.Position(0, 0),
-        new vscode.Position(0, 0)
-      ),
+      range: fileBeginningRange,
     }));
   }
 
