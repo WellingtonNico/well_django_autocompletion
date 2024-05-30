@@ -18,7 +18,7 @@ export async function activate(context: vscode.ExtensionContext) {
     return;
   }
   let activate = vscode.commands.registerCommand(
-    "well_django_autocompletion.activate",
+    "welldjangoautocompletion.activate",
     () => {
       vscode.window.showInformationMessage(
         "Well Django Autocomplete activated."
@@ -28,7 +28,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   );
   let update = vscode.commands.registerCommand(
-    "well_django_autocompletion.update_cache",
+    "welldjangoautocompletion.update_cache",
     () => {
       vscode.window.showInformationMessage(
         "Well Django Autocomplete cache update incomming."
@@ -37,7 +37,7 @@ export async function activate(context: vscode.ExtensionContext) {
       updateUrlsConfigsCache();
     }
   );
-  vscode.commands.executeCommand("well_django_autocompletion.activate");
+  vscode.commands.executeCommand("welldjangoautocompletion.activate");
   context.subscriptions.push(activate);
   context.subscriptions.push(update);
 }

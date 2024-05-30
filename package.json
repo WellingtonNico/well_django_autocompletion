@@ -1,5 +1,5 @@
 {
-  "name": "well_django_autocompletion",
+  "name": "welldjangoautocompletion",
   "displayName": "Well Django autocompletion",
   "description": "django autocompletion extension",
   "publisher": "WellingtonNico",
@@ -18,17 +18,17 @@
   "contributes": {
     "commands": [
       {
-        "command": "well_django_autocompletion.activate",
+        "command": "welldjangoautocompletion.activate",
         "title": "Well Django Autocompletion activate"
       },
       {
-        "command": "well_django_autocompletion.update_cache",
+        "command": "welldjangoautocompletion.update_cache",
         "title": "Well Django Autocompletion update cache"
       }
     ]
   },
   "repository": {
-    "url": "https://github.com/WellingtonNico/well_django_autocompletion"
+    "url": "https://github.com/WellingtonNico/welldjangoautocompletion"
   },
   "keywords": [
     "html",
