@@ -40,7 +40,7 @@ export function createEndsWithRegex(strings: string[]) {
   return new RegExp(pattern);
 }
 
-export function getCleanedLine(
+export function getCleanedLineUntilPosition(
   document: vscode.TextDocument,
   currentPosition: vscode.Position,
   linesToCheck: number

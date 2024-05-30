@@ -4,7 +4,7 @@ import {
   createDocumentFiltersForExtensions,
   createEndsWithRegex,
   fileBeginningRange,
-  getCleanedLine,
+  getCleanedLineUntilPosition,
   getCompleteWordFromLine,
 } from "./utils";
 
@@ -82,7 +82,11 @@ function createAutocompletionProvider(config: types.ProviderConfig) {
     languageFilters,
     {
       async provideCompletionItems(document, position, _, context) {
-        const line = getCleanedLine(document, position, linesToCheck);
+        const line = getCleanedLineUntilPosition(
+          document,
+          position,
+          linesToCheck
+        );
         if (regexPattern.test(line)) {
           return await getOrUpdateCompletionItems();
         }

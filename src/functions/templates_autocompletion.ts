@@ -3,7 +3,7 @@ import * as types from "../types/main";
 import {
   createDocumentFiltersForExtensions,
   createEndsWithRegex,
-  getCleanedLine,
+  getCleanedLineUntilPosition,
 } from "./utils";
 
 const cacheSeconds = 240;
@@ -76,7 +76,11 @@ function createAutocompletionProvider(config: types.ProviderConfig) {
     languageFilters,
     {
       async provideCompletionItems(document, position, _, context) {
-        const line = getCleanedLine(document, position, linesToCheck);
+        const line = getCleanedLineUntilPosition(
+          document,
+          position,
+          linesToCheck
+        );
         if (regexPattern.test(line)) {
           return await getOrUpdateCompletionItems();
         }
