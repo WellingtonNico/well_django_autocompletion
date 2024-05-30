@@ -11,6 +11,6 @@
 
 ### Usage examples
 
-![All text](images/example_on_template.gif)
-![All text](images/template_autocompletion.gif)
-![All text](images/url_autocompletion.gif)
+![Well Django autocompletion](images/example_on_template.gif)
+![Well Django autocompletion](images/template_autocompletion.gif)
+![Well Django autocompletion](images/url_autocompletion.gif)

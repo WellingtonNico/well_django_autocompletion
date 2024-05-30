@@ -2,7 +2,7 @@
   "name": "well_django_autocompletion",
   "displayName": "Well Django autocompletion",
   "description": "django autocompletion extension",
-  "publisher": "Wellington Adriano Nicoletti de Abreu",
+  "publisher": "WellingtonNico",
   "version": "0.0.1",
   "icon": "images/icon.png",
   "engines": {
