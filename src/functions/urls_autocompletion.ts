@@ -6,7 +6,6 @@ import {
   getCleanedLine,
 } from "./utils";
 
-
 const cacheSeconds = 240;
 
 const triggers = ['"', "'"];
@@ -145,45 +144,38 @@ async function urlProviderDefinition(
     return [];
   }
   let urlName = document.getText(wordRange);
-  // catches the characters before the selected word
-  const doubleDotsCheck = document.getText(
+
+  const regex = new RegExp(
+    String.raw`['"]([^'\s"]*${urlName}[^'\s"]*)['"]`,
+    "gi"
+  );
+
+  const line = document.getText(
     new vscode.Range(
-      new vscode.Position(wordRange.start.line, wordRange.start.character - 1),
-      wordRange.start
+      new vscode.Position(position.line, 0),
+      new vscode.Position(position.line + 1, 0)
     )
   );
-  // check if there is a namespace before url name
-  if (doubleDotsCheck === ":") {
-    const appName = document
-      .getText(
-        new vscode.Range(
-          new vscode.Position(wordRange.start.line, 0),
-          new vscode.Position(
-            wordRange.start.line,
-            wordRange.start.character - 1
-          )
-        )
-      )
-      .replaceAll('"', "'")
-      .split("'")
-      .pop();
-    // if there is a namespace before url name then add it to the url
-    if (appName) {
-      urlName = `${appName}:${urlName}`;
-    }
+
+  const matches = regex.exec(line);
+
+  if (matches && matches[1]) {
+    urlName = matches[1];
   }
+
+  // catches the characters before the selected word
   await getOrUpdateCompletionItems();
-  const configs = cachedGroupUrls[urlName];
-  if (configs === undefined) {
-    return [];
+  if (urlName in cachedGroupUrls) {
+    return cachedGroupUrls[urlName].map((uri) => ({
+      uri,
+      range: new vscode.Range(
+        new vscode.Position(0, 0),
+        new vscode.Position(0, 0)
+      ),
+    }));
   }
-  return configs.map((uri) => ({
-    uri,
-    range: new vscode.Range(
-      new vscode.Position(0, 0),
-      new vscode.Position(0, 0)
-    ),
-  }));
+
+  return [];
 }
 
 function activateDefinitionProviderForUrls() {
