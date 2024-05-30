@@ -139,16 +139,16 @@ async function urlProviderDefinition(
   document: vscode.TextDocument,
   position: vscode.Position
 ) {
-  let range = document.getWordRangeAtPosition(position);
-  if (!range || range.isEmpty) {
+  const wordRange = document.getWordRangeAtPosition(position);
+  if (!wordRange || wordRange.isEmpty) {
     return [];
   }
-  let urlName = document.getText(range);
+  let urlName = document.getText(wordRange);
   // catches the characters before the selected word
   const doubleDotsCheck = document.getText(
     new vscode.Range(
-      new vscode.Position(range.start.line, range.start.character - 1),
-      range.start
+      new vscode.Position(wordRange.start.line, wordRange.start.character - 1),
+      wordRange.start
     )
   );
   // check if there is a namespace before url name
@@ -156,8 +156,11 @@ async function urlProviderDefinition(
     const appName = document
       .getText(
         new vscode.Range(
-          new vscode.Position(range.start.line, 0),
-          new vscode.Position(range.start.line, range.start.character - 1)
+          new vscode.Position(wordRange.start.line, 0),
+          new vscode.Position(
+            wordRange.start.line,
+            wordRange.start.character - 1
+          )
         )
       )
       .replaceAll('"', "'")
@@ -173,7 +176,13 @@ async function urlProviderDefinition(
   if (configs === undefined) {
     return [];
   }
-  return configs.map((uri) => ({ uri, range }));
+  return configs.map((uri) => ({
+    uri,
+    range: new vscode.Range(
+      new vscode.Position(0, 0),
+      new vscode.Position(0, 0)
+    ),
+  }));
 }
 
 function activateDefinitionProviderForUrls() {
