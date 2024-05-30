@@ -10,6 +10,10 @@ import {
   updateUrlsConfigsCache,
 } from "./functions/urls_autocompletion";
 import { isDjangoProject } from "./functions/utils";
+import {
+  activateStaticFilesAutocompletion,
+  updateCachedStaticFiles,
+} from "./functions/staticfiles_autocompletion";
 
 export async function activate(context: vscode.ExtensionContext) {
   const isDjango = await isDjangoProject();
@@ -25,6 +29,7 @@ export async function activate(context: vscode.ExtensionContext) {
       );
       activateTemplatesAutocompletion(context);
       activateUrlNamesAutocompletion(context);
+      activateStaticFilesAutocompletion(context);
     }
   );
   let update = vscode.commands.registerCommand(
@@ -35,6 +40,7 @@ export async function activate(context: vscode.ExtensionContext) {
       );
       updateTemplatesCompletions();
       updateUrlsConfigsCache();
+      updateCachedStaticFiles();
     }
   );
   vscode.commands.executeCommand("welldjangoautocompletion.activate");
