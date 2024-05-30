@@ -1,29 +1,42 @@
 {
-  "name": "well_autocomplete",
-  "displayName": "Well autocomplete for Django",
-  "description": "django template autocompletion",
+  "name": "well_django_autocompletion",
+  "displayName": "Well Django autocompletion",
+  "description": "django autocompletion extension",
+  "publisher": "Wellington Adriano Nicoletti de Abreu",
   "version": "0.0.1",
-  "icon":"icon.png",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.89.0"
   },
   "categories": [
-    "Other"
+    "Programming Languages"
   ],
-  "activationEvents": [ "*" ],
+  "activationEvents": [
+    "*"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "well_autocomplete.activate",
-        "title": "Well autocomplete activate"
+        "command": "well_django_autocompletion.activate",
+        "title": "Well Django Autocompletion activate"
       },
       {
-        "command": "well_autocomplete.update_cache",
-        "title": "Well autocomplete update cache"
+        "command": "well_django_autocompletion.update_cache",
+        "title": "Well Django Autocompletion update cache"
       }
     ]
   },
+  "repository": {
+    "url": "https://github.com/WellingtonNico/well_django_autocompletion"
+  },
+  "keywords": [
+    "html",
+    "urls",
+    "django",
+    "autocomplete",
+    "templates"
+  ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",

@@ -18,24 +18,26 @@ export async function activate(context: vscode.ExtensionContext) {
     return;
   }
   let activate = vscode.commands.registerCommand(
-    "well_autocomplete.activate",
+    "well_django_autocompletion.activate",
     () => {
-      vscode.window.showInformationMessage("Well autocomplete activated.");
+      vscode.window.showInformationMessage(
+        "Well Django Autocomplete activated."
+      );
       activateTemplatesAutocompletion(context);
       activateUrlNamesAutocompletion(context);
     }
   );
   let update = vscode.commands.registerCommand(
-    "well_autocomplete.update_cache",
+    "well_django_autocompletion.update_cache",
     () => {
       vscode.window.showInformationMessage(
-        "Well autocomplete update incomming."
+        "Well Django Autocomplete cache update incomming."
       );
       updateTemplatesCompletions();
       updateUrlsConfigsCache();
     }
   );
-  vscode.commands.executeCommand("well_autocomplete.activate");
+  vscode.commands.executeCommand("well_django_autocompletion.activate");
   context.subscriptions.push(activate);
   context.subscriptions.push(update);
 }
