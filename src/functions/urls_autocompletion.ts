@@ -23,6 +23,7 @@ const configs: types.ProviderConfig[] = [
       "url_name=",
       "url_name:",
       "url:",
+      "{%url",
     ],
   },
   { extensions: ["html"], checks: ["{%url", "url_name", "url"] },
