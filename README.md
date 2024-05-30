@@ -12,3 +12,4 @@
 ### Usage examples
 
 ![All text](images/example_on_template.gif)
+![All text](images/template_autocompletion.gif)
