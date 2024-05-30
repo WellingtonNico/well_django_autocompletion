@@ -22,7 +22,7 @@ type CleanedFiles = {
 };
 
 let cachedStaticFilesCompletionItems: vscode.CompletionItem[] = [];
-let cachedStaticFilesCompletions: CleanedFiles = {};
+let cachedStaticFilesDefinitions: CleanedFiles = {};
 let cachedLastUpdatedTime = new Date().getTime();
 
 async function getStaticFilesUris() {
@@ -34,19 +34,19 @@ async function getStaticFilesUris() {
 
 export async function updateCachedStaticFiles() {
   const uris = await getStaticFilesUris();
-  cachedStaticFilesCompletions = {};
+  cachedStaticFilesDefinitions = {};
   cachedStaticFilesCompletionItems = [];
   for (const uri of uris) {
     if (!uri.fsPath.includes("__")) {
       const label = uri.fsPath.split(/static\/|staticfiles\//)[1];
-      if (!cachedStaticFilesCompletions[label]) {
-        cachedStaticFilesCompletions[label] = [];
+      if (!cachedStaticFilesDefinitions[label]) {
+        cachedStaticFilesDefinitions[label] = [];
       }
-      cachedStaticFilesCompletions[label].push(uri);
+      cachedStaticFilesDefinitions[label].push(uri);
     }
   }
   cachedStaticFilesCompletionItems = Object.keys(
-    cachedStaticFilesCompletions
+    cachedStaticFilesDefinitions
   ).map((label) => ({
     label,
     kind: vscode.CompletionItemKind.File,
@@ -90,10 +90,41 @@ function createAutocompletionProvider(config: types.ProviderConfig) {
   );
 }
 
+async function definitionProviderForStaticFiles(
+  document: vscode.TextDocument,
+  position: vscode.Position
+) {
+  const wordRange = document.getWordRangeAtPosition(position);
+  if (!wordRange || wordRange.isEmpty) {
+    return [];
+  }
+  let label = document.getText(wordRange);
+
+  await getOrUpdateCompletionItems();
+  const configs = cachedStaticFilesDefinitions[label];
+  if (configs === undefined) {
+    return [];
+  }
+  return configs.map((uri) => ({
+    uri,
+    range: new vscode.Range(
+      new vscode.Position(0, 0),
+      new vscode.Position(0, 0)
+    ),
+  }));
+}
+
+function activateDefinitionProviderForStaticFiles() {
+  const languageFilters = createDocumentFiltersForExtensions(["html"]);
+  return vscode.languages.registerDefinitionProvider(languageFilters, {
+    provideDefinition: definitionProviderForStaticFiles,
+  });
+}
 
 export async function activateStaticFilesAutocompletion(
   context: vscode.ExtensionContext
 ) {
+  activateDefinitionProviderForStaticFiles();
   for (const config of configs) {
     const provider = createAutocompletionProvider(config);
     context.subscriptions.push(provider);
