@@ -25,6 +25,13 @@
         "command": "welldjangoautocompletion.update_cache",
         "title": "Well Django Autocompletion update cache"
       }
+    ],
+    "grammars": [
+      {
+        "language": "python",
+        "scopeName": "html-embedded-on-python",
+        "path": "src/syntaxes/html-embedded-on-python.json"
+      }
     ]
   },
   "repository": {

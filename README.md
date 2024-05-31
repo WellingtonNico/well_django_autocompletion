@@ -22,6 +22,10 @@ to go to the views clicking on url names.
 * Definition provider using `CMD+click` or `CTRL+click` on a static file will take you to the static file(Only works in HTML files).
  
 
+### HTML highlight on python files
+* place a commend `# language=html` on top of your html string in python and `# end-language=html` on the bottom of it to stop highlighting.
+
+
 ### Usage examples
 
 ![Well Django autocompletion](images/example_on_template.gif)
