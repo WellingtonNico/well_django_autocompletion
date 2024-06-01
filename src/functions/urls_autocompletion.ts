@@ -20,6 +20,8 @@ const configs: types.ProviderConfig[] = [
     checks: [
       "reverse_lazy(",
       "reverse(",
+      "redirect(",
+      "redirect(to=",
       "url=",
       "url_name=",
       "url_name:",
