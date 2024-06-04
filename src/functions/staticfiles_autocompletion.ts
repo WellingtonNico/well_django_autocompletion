@@ -15,7 +15,7 @@ const triggers = ['"', "'"];
 const linesToCheck = 1;
 
 const configs: types.ProviderConfig[] = [
-  { extensions: ["html", "py"], checks: ["{%static", "{%extends", "src="] },
+  { extensions: ["html", "py"], checks: ["{%static", "{%extends"] },
   { extensions: ["js"], checks: ["src=", "url(", "@import"] },
   { extensions: ["css"], checks: ["url(", "@import"] },
 ];
