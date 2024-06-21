@@ -1,4 +1,4 @@
-# Welcome to Well Django Autocompletion
+# Welcome to Well Django
 
 ## Why to use this extension?
 This extension is aimed at developers who like VSCODE but also like the amazing PYCHARM 
@@ -9,6 +9,7 @@ to go to the views clicking on url names.
 ### Django templates
 * Autocompletion when using `include` and `extends` in HTML files.
 * Autocompletion when defining variables or dict keys in python files, like `template_name` in class based views.
+* Django template correct indentation using [djhtml](https://pypi.org/project/djhtml/) library(you need to have it installed in your virtual environment).
 
 
 ### Django urls
@@ -21,10 +22,6 @@ to go to the views clicking on url names.
 * Autocompletion when using `static` tag or if you are using `src` attribute in HTML and Python files, `src` also works for javascript files.
 * Definition provider using `CMD+click` or `CTRL+click` on a static file will take you to the static file(Only works in HTML files).
  
-
-### HTML highlight on python files
-* place a commend `# language=html` on top of your html string in python and `# end-language=html` on the bottom of it to stop highlighting.
-
 
 ### Usage examples
 

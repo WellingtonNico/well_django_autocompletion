@@ -6,7 +6,7 @@ import {
   fileBeginningRange,
   getCleanedLineUntilPosition,
   getCompleteWordFromLine,
-} from "./utils";
+} from "../utils";
 
 const cacheSeconds = 240;
 

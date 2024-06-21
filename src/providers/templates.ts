@@ -4,7 +4,7 @@ import {
   createDocumentFiltersForExtensions,
   createEndsWithRegex,
   getCleanedLineUntilPosition,
-} from "./utils";
+} from "../utils";
 
 const cacheSeconds = 240;
 

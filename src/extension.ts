@@ -4,16 +4,17 @@ import * as vscode from "vscode";
 import {
   activateTemplatesAutocompletion,
   updateTemplatesCompletions,
-} from "./functions/templates_autocompletion";
+} from "./providers/templates";
 import {
   activateUrlNamesAutocompletion,
   updateUrlsConfigsCache,
-} from "./functions/urls_autocompletion";
-import { isDjangoProject } from "./functions/utils";
+} from "./providers/urls";
+import { isDjangoProject } from "./utils";
 import {
   activateStaticFilesAutocompletion,
   updateCachedStaticFiles,
-} from "./functions/staticfiles_autocompletion";
+} from "./providers/staticfiles";
+import { DjhtmlFormatter } from "./providers/djhtml_formatter";
 
 export async function activate(context: vscode.ExtensionContext) {
   const isDjango = await isDjangoProject();
@@ -21,29 +22,28 @@ export async function activate(context: vscode.ExtensionContext) {
   if (!isDjango) {
     return;
   }
-  let activate = vscode.commands.registerCommand(
-    "welldjangoautocompletion.activate",
-    () => {
-      vscode.window.showInformationMessage(
-        "Well Django Autocomplete activated."
-      );
-      activateTemplatesAutocompletion(context);
-      activateUrlNamesAutocompletion(context);
-      activateStaticFilesAutocompletion(context);
-    }
-  );
-  let update = vscode.commands.registerCommand(
-    "welldjangoautocompletion.update_cache",
-    () => {
-      vscode.window.showInformationMessage(
-        "Well Django Autocomplete cache update incomming."
-      );
-      updateTemplatesCompletions();
-      updateUrlsConfigsCache();
-      updateCachedStaticFiles();
-    }
-  );
-  vscode.commands.executeCommand("welldjangoautocompletion.activate");
+  let activate = vscode.commands.registerCommand("wellDjango.activate", () => {
+    vscode.window.showInformationMessage("Well Django: activated.");
+    activateTemplatesAutocompletion(context);
+    activateUrlNamesAutocompletion(context);
+    activateStaticFilesAutocompletion(context);
+  });
+
+  let update = vscode.commands.registerCommand("wellDjango.updateCache", () => {
+    vscode.window.showInformationMessage(
+      "Well Django: cache update incomming."
+    );
+    updateTemplatesCompletions();
+    updateUrlsConfigsCache();
+    updateCachedStaticFiles();
+  });
+  vscode.commands.executeCommand("wellDjango.activate");
+
+  const outputChannel = vscode.window.createOutputChannel("wellDjango", {
+    log: true,
+  });
+  context.subscriptions.push(outputChannel);
+  new DjhtmlFormatter(context, outputChannel).activate();
   context.subscriptions.push(activate);
   context.subscriptions.push(update);
 }
