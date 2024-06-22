@@ -9,7 +9,7 @@ to go to the views clicking on url names.
 ### Django templates
 * Autocompletion when using `include` and `extends` in HTML files.
 * Autocompletion when defining variables or dict keys in python files, like `template_name` in class based views.
-* Django template correct indentation using [djhtml](https://pypi.org/project/djhtml/) library(you need to have it installed in your virtual environment).
+* Django template correct indentation using [djhtml](https://pypi.org/project/djhtml/) library(you need to have it installed in your virtual environment). It is recommended when you are using DJLint as formatter with jsformat disabled.
 
 
 ### Django urls

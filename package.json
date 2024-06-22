@@ -1,6 +1,6 @@
 {
-  "name": "well-django",
-  "displayName": "Well Django",
+  "name": "well-django-support",
+  "displayName": "Well Django Support",
   "description": "A very handfull django extension for vscode",
   "publisher": "WellingtonNico",
   "version": "0.0.1",
