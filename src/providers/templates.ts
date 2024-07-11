@@ -15,7 +15,13 @@ const linesToCheck = 2;
 const configs: types.ProviderConfig[] = [
   {
     extensions: ["py"],
-    checks: ["render(", "template_name=", "template_name:"],
+    checks: [
+      "render(",
+      "template_name=",
+      "template_name:",
+      "{%include",
+      "{%extends",
+    ],
   },
   { extensions: ["html"], checks: ["{%include", "{%extends"] },
 ];
